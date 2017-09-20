@@ -4,8 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.client.Client;
@@ -100,6 +102,23 @@ public class ConcertServiceTest {
 	
 	@Test
 	public void testRetrieveConcerts() {
+		Set<String> tableNames = new HashSet<String>();
+		tableNames.add("CONCERT");
+		tableNames.add("PERFORMER");
+		tableNames.add("CONCERT_TARIFS");
+		tableNames.add("CONCERT_PERFORMER");
+		tableNames.add("CONCERT_DATES");
+		try {
+			DatabaseUtility.openDatabase();
+			DatabaseUtility.dumpDatabase(tableNames);
+			DatabaseUtility.closeDatabase();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		final int numberOfConcerts = 25;
 		
 		Set<ConcertDTO> concerts = _service.getConcerts();

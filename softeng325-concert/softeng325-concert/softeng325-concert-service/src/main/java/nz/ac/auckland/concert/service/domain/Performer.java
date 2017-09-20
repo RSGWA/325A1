@@ -1,9 +1,15 @@
 package nz.ac.auckland.concert.service.domain;
 
+import java.util.Set;
+
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -35,6 +41,14 @@ public class Performer {
 	@Enumerated(EnumType.STRING)
 	@XmlElement(name="genre")
 	private Genre _genre;
+	
+	@XmlElement(name="concertIds")
+	@ElementCollection
+	@CollectionTable(
+			name = "CONCERT_PERFORMER",
+			joinColumns = @JoinColumn( name = "PERFORMER_ID" ) )
+			@Column( name = "CONCERT_ID" )
+	private Set<Long> _concertIds;
 	
 	public Performer() {}
 	
