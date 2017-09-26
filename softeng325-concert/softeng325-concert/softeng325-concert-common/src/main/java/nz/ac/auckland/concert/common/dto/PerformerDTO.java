@@ -4,6 +4,21 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import nz.ac.auckland.concert.common.types.Genre;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -21,13 +36,28 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  *             playing. 
  *             
  */
+@Entity
+@Table(name="PERFORMERS")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class PerformerDTO {
 
+	@Id
+	@XmlAttribute(name="id")
 	private Long _id;
+	
+	@XmlElement(name="name")
 	private String _name;
+	
+	@XmlElement(name="imageName")
 	private String _imageName;
+	
+	@Enumerated(EnumType.STRING)
+	@XmlElement(name="genre")
 	private Genre _genre;
 	
+	@XmlElement(name="concertIds")
+	@ElementCollection
 	private Set<Long> _concertIds;
 	
 	public PerformerDTO() {}

@@ -1,10 +1,14 @@
 package nz.ac.auckland.concert.common.dto;
 
-import nz.ac.auckland.concert.common.types.SeatNumber;
-import nz.ac.auckland.concert.common.types.SeatRow;
+import javax.persistence.Embeddable;
+import javax.persistence.Enumerated;
+import javax.xml.bind.annotation.XmlElement;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import nz.ac.auckland.concert.common.types.SeatNumber;
+import nz.ac.auckland.concert.common.types.SeatRow;
 
 /**
  * DTO class to represent seats at the concert venue. 
@@ -14,9 +18,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * _number the number of the seat.
  *
  */
+@Embeddable
 public class SeatDTO {
-
+	
+	@Enumerated
+	@XmlElement(name="row")
 	private SeatRow _row;
+	
+	@XmlElement(name="number")
 	private SeatNumber _number;
 	
 	public SeatDTO() {}

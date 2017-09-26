@@ -246,29 +246,4 @@ public class ConcertResource {
 		
 		return builder.build();
 	}
-	
-	/**
-	 * Helper method that can be called from every service method to generate a 
-	 * NewCookie instance, if necessary, based on the clientId parameter.
-	 * 
-	 * @param userId the Cookie whose name is Config.CLIENT_COOKIE, extracted 
-	 * from a HTTP request message. This can be null if there was no cookie 
-	 * named Config.CLIENT_COOKIE present in the HTTP request message. 
-	 * 
-	 * @return a NewCookie object, with a generated UUID value, if the clientId 
-	 * parameter is null. If the clientId parameter is non-null (i.e. the HTTP 
-	 * request message contained a cookie named Config.CLIENT_COOKIE), this 
-	 * method returns null as there's no need to return a NewCookie in the HTTP
-	 * response message. 
-	 */
-	private NewCookie makeCookie(Cookie clientId){
-		NewCookie newCookie = null;
-		
-		if(clientId == null) {
-			newCookie = new NewCookie(Config.CLIENT_COOKIE, UUID.randomUUID().toString());
-			_logger.info("Generated cookie: " + newCookie.getValue());
-		} 
-		
-		return newCookie;
-	}
 }

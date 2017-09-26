@@ -103,11 +103,11 @@ public class ConcertServiceTest {
 	@Test
 	public void testRetrieveConcerts() {
 		Set<String> tableNames = new HashSet<String>();
-		tableNames.add("CONCERT");
-		tableNames.add("PERFORMER");
-		tableNames.add("CONCERT_TARIFS");
-		tableNames.add("CONCERT_PERFORMER");
-		tableNames.add("CONCERT_DATES");
+		// tableNames.add("CONCERTS");
+		// tableNames.add("PERFORMERS");
+		// tableNames.add("CONCERT_TARIFS");
+		// tableNames.add("CONCERT_PERFORMER");
+		// tableNames.add("CONCERT_DATES");
 		try {
 			DatabaseUtility.openDatabase();
 			DatabaseUtility.dumpDatabase(tableNames);
@@ -140,6 +140,19 @@ public class ConcertServiceTest {
 			_service.createUser(userDTO);
 		} catch(ServiceException e) {
 			fail();
+		}
+		Set<String> tableNames = new HashSet<String>();
+		// tableNames.add("USERS");
+		try {
+			DatabaseUtility.openDatabase();
+			DatabaseUtility.dumpDatabase(tableNames);
+			DatabaseUtility.closeDatabase();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	

@@ -1,6 +1,10 @@
 package nz.ac.auckland.concert.service.services;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.EntityManager;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 /**
@@ -9,6 +13,7 @@ import javax.ws.rs.core.Application;
  * 
  *
  */
+@ApplicationPath("/services")
 public class ConcertApplication extends Application {
 
 	// This property should be used by your Resource class. It represents the 
@@ -19,8 +24,15 @@ public class ConcertApplication extends Application {
 	// This property is used by class ConcertServiceTest.
 	public static final int RESERVATION_EXPIRY_TIME_IN_SECONDS = 5;
 	
+	private Set<Object> singletons = new HashSet<Object>();
+	
+	private Set<Class<?>> classes = new HashSet<Class<?>>();
+	
 	// Constructor called by JAX-RS.
 	public ConcertApplication () {
+		singletons.add(new PersistenceManager());
+		classes.add(ConcertResource.class);
+
 		EntityManager em = null;
 		try {
 			em = PersistenceManager.instance().createEntityManager();
@@ -50,5 +62,16 @@ public class ConcertApplication extends Application {
 				em.close ();
 			}
 		}
+	}
+	
+	@Override
+	public Set<Object> getSingletons()
+	{
+		return singletons;
+	}
+	
+	@Override
+	public Set<Class<?>> getClasses() {
+		return classes;
 	}
 }
