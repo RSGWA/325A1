@@ -5,12 +5,10 @@ import java.net.URI;
 import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
@@ -38,21 +36,20 @@ public class UserResource {
 		ResponseBuilder builder = null;
 		em.getTransaction().begin();
 
-		
 		if (validUser(newUser)) {
 			if (usernameExists(newUser)) {
 				em.persist(newUser);
-				_logger.info("New User Created: " +newUser.getUsername());
+				_logger.debug("New User Created: " +newUser.getUsername());
 				NewCookie newToken = createToken(token, newUser.getUsername());
 			
-				builder = Response.status(201).location(URI.create("/users/"+newUser.getUsername()));
+				builder = Response.status(201).location(URI.create("/users"));
 				builder.cookie(newToken);
 			} else {
-				_logger.info("Non-unique username");
+				_logger.debug("Non-unique username");
 				builder = Response.status(Status.BAD_REQUEST).entity(Messages.CREATE_USER_WITH_NON_UNIQUE_NAME);
 			}
 		} else {
-			_logger.info("Missing Fields");
+			_logger.debug("Missing Fields");
 			builder = Response.status(Status.BAD_REQUEST).entity(Messages.CREATE_USER_WITH_MISSING_FIELDS);
 		}
 		em.getTransaction().commit();
@@ -66,17 +63,28 @@ public class UserResource {
 		Response.ResponseBuilder builder = null;
 		em.getTransaction().begin();
 		
-		_logger.info("Authenticating: " +user.getUsername());
+		_logger.debug("Authenticating: " +user.getUsername());
 		
 		if (token == null) {
-			_logger.info("Unauthenticated user");
+			_logger.debug("No authentication token");
+			builder = Response.status(Status.BAD_REQUEST).entity(Messages.AUTHENTICATE_NON_EXISTENT_USER);
 		} else {
-			_logger.info("Authenticated user");
-			UserDTO fullUser = em.find(UserDTO.class, user.getUsername());
-			builder = Response.ok(fullUser);
+			if (!validUser(user)) {
+				_logger.debug("Missing Fields");
+				builder = Response.status(Status.BAD_REQUEST).entity(Messages.AUTHENTICATE_USER_WITH_MISSING_FIELDS);
+			} else {
+				UserDTO fullUser = em.find(UserDTO.class, user.getUsername());
+				if (!fullUser.getPassword().equals(user.getPassword())) {
+					_logger.debug("Incorrect Password");
+					builder = Response.status(Status.BAD_REQUEST).entity(Messages.AUTHENTICATE_USER_WITH_ILLEGAL_PASSWORD);
+				} else {
+					_logger.debug("Authenticated user");
+					builder = Response.ok(fullUser);
+				}
+			}
 		}
-		
 		em.getTransaction().commit();
+		
 		return builder.build();
 	}
 	
@@ -85,7 +93,7 @@ public class UserResource {
 		
 		if(token == null) {
 			newToken = new NewCookie(USER_TOKEN, username);
-			_logger.info("Generated Token: " + newToken.getValue());
+			_logger.debug("Generated Token: " + newToken.getValue());
 		} 
 		
 		return newToken;
@@ -109,6 +117,5 @@ public class UserResource {
 		} else {
 			return false;
 		}
-		
 	}
 }
