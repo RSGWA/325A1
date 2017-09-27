@@ -40,6 +40,10 @@ public class ConcertApplication extends Application {
 			
 			em = PersistenceManager.instance().createEntityManager();
 			
+			em.createQuery("delete from UserDTO").executeUpdate(); 
+			em.createQuery("delete from Reservation").executeUpdate(); 
+			em.createQuery("delete from Booking").executeUpdate(); 
+			
 			em.getTransaction().begin();
 		
 			em.getTransaction().commit();
