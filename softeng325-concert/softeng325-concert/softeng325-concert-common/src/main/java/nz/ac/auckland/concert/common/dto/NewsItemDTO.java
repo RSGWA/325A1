@@ -2,6 +2,15 @@ package nz.ac.auckland.concert.common.dto;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -16,10 +25,20 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * _content   the news item context text.   
  *
  */
+@Entity
+@Table(name="NEWS_ITEMS")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class NewsItemDTO {
 
+	@Id
+	@XmlAttribute(name="id")
 	private Long _id;
+	
+	@XmlElement(name="timestamp")
 	private LocalDateTime _timestamp;
+	
+	@XmlElement(name="content")
 	private String _content;
 	
 	public NewsItemDTO() {}

@@ -2,6 +2,17 @@ package nz.ac.auckland.concert.common.dto;
 
 import java.time.LocalDate;
 
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -15,13 +26,26 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * _expiryDate the credit card's expiry date. 
  *
  */
+@Entity
+@Table(name="CREDIT_CARDS")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CreditCardDTO {
 	
 	public enum Type {Visa, Master};
 	
+	@Enumerated(EnumType.STRING)
+	@XmlElement(name="type")
 	private Type _type;
+	
+	@Id
+	@XmlAttribute(name="name")
 	private String _name;
+	
+	@XmlElement(name="number")
 	private String _number;
+	
+	@XmlElement(name="expiryDate")
 	private LocalDate _expiryDate;
 	
 	public CreditCardDTO() {}

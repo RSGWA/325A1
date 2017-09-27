@@ -28,23 +28,6 @@ public class ConcertResource {
 	EntityManager em = PersistenceManager.instance().createEntityManager();
 	
 	@GET
-	@Path("/{id}")
-	@Produces(MediaType.APPLICATION_XML)
-	public Response retrieveConcert(@PathParam("id") Long id) {
-		em.getTransaction().begin();
-		ConcertDTO concert = em.find(ConcertDTO.class, id);
-		
-		Response.ResponseBuilder builder = null;
-		if (concert == null) {
-			builder = Response.status(404);
-		} else {
-			builder = Response.status(200).entity(concert);
-		}
-		
-		return builder.build();
-	}
-	
-	@GET
 	@Produces(MediaType.APPLICATION_XML)
 	public Response retrieveAllConcerts() {
 		em.getTransaction().begin();

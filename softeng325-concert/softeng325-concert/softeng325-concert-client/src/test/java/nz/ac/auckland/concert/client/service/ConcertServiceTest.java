@@ -139,11 +139,6 @@ public class ConcertServiceTest {
 			UserDTO userDTO = new UserDTO("Bulldog", "123", "Churchill", "Winston");
 			_service.createUser(userDTO);
 			
-			UserDTO userDTO1 = new UserDTO("Pitbull", "123", "Churchill", "Winston");
-			_service.createUser(userDTO1);
-			
-			UserDTO userDTO2 = new UserDTO("GermanShepard", "123", "Churchill", "Winston");
-			_service.createUser(userDTO2);
 		} catch(ServiceException e) {
 			fail();
 		}
@@ -437,7 +432,7 @@ public class ConcertServiceTest {
 	@Test
 	public void testRegisterCreditCard() {
 		try {
-			UserDTO userDTO = new UserDTO("Bulldog", "123", "Churchill", "Winston");
+			UserDTO userDTO = new UserDTO("German Shepard", "123", "Churchill", "Winston");
 			_service.createUser(userDTO);
 			
 			CreditCardDTO creditCard = new CreditCardDTO(CreditCardDTO.Type.Visa, "Winston Churchill", "4929-1500-0055-9544", LocalDate.of(2019, 7, 31));
@@ -445,6 +440,19 @@ public class ConcertServiceTest {
 		} catch(ServiceException e) {
 			fail();
 		} 
+		Set<String> tableNames = new HashSet<String>();
+		tableNames.add("CREDIT_CARDS");
+		try {
+			DatabaseUtility.openDatabase();
+			DatabaseUtility.dumpDatabase(tableNames);
+			DatabaseUtility.closeDatabase();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Test

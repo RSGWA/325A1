@@ -37,19 +37,20 @@ public class ConcertApplication extends Application {
 
 		EntityManager em = null;
 		try {
+			
 			em = PersistenceManager.instance().createEntityManager();
 			
 			em.getTransaction().begin();
 		
-			em.createQuery("delete from USERS").executeUpdate();
-		
 			em.getTransaction().commit();
 		
 		} catch(Exception e) {
-			// Process and log the exception .
+			// Process and log the exception.
+			e.printStackTrace();
+		
 		} finally {
 			if(em != null && em.isOpen()) {
-				em.close ();
+				em.close();
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 package nz.ac.auckland.concert.common.dto;
 
 import javax.persistence.Embeddable;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.xml.bind.annotation.XmlElement;
 
@@ -21,7 +22,7 @@ import nz.ac.auckland.concert.common.types.SeatRow;
 @Embeddable
 public class SeatDTO {
 	
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	@XmlElement(name="row")
 	private SeatRow _row;
 	

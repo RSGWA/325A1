@@ -1,11 +1,11 @@
 package nz.ac.auckland.concert.service.services;
 
 import java.net.URI;
-
 import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Cookie;
@@ -18,8 +18,10 @@ import javax.ws.rs.core.Response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nz.ac.auckland.concert.common.dto.CreditCardDTO;
 import nz.ac.auckland.concert.common.dto.UserDTO;
 import nz.ac.auckland.concert.common.message.Messages;
+import nz.ac.auckland.concert.service.util.Config;
 
 @Path("/users")
 public class UserResource {
@@ -27,20 +29,21 @@ public class UserResource {
 	private static Logger _logger = LoggerFactory
 			.getLogger(ConcertResource.class);
 	
-	public static final String USER_TOKEN = "userToken";
+	private NewCookie newToken;
+	
 	EntityManager em = PersistenceManager.instance().createEntityManager();
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_XML)
-	public Response createUser(UserDTO newUser, @CookieParam(USER_TOKEN) Cookie token) {
+	public Response createUser(UserDTO newUser, @CookieParam(Config.TOKEN) Cookie token) {
 		ResponseBuilder builder = null;
 		em.getTransaction().begin();
-
+		
 		if (validUser(newUser)) {
 			if (usernameExists(newUser)) {
 				em.persist(newUser);
 				_logger.debug("New User Created: " +newUser.getUsername());
-				NewCookie newToken = createToken(token, newUser.getUsername());
+				newToken = createToken(token, newUser.getUsername());
 			
 				builder = Response.status(201).location(URI.create("/users"));
 				builder.cookie(newToken);
@@ -56,14 +59,39 @@ public class UserResource {
 		return builder.build();
 	}
 	
-	@POST
-	@Path("/authenticate")
-	@Produces(MediaType.APPLICATION_XML)
-	public Response authenticateUser(UserDTO user, @CookieParam(USER_TOKEN) Cookie token) {
+	@PUT
+	@Consumes(MediaType.APPLICATION_XML)
+	public Response registerCreditCard(CreditCardDTO creditCard, @CookieParam(Config.TOKEN) Cookie token) {
 		Response.ResponseBuilder builder = null;
 		em.getTransaction().begin();
 		
-		_logger.debug("Authenticating: " +user.getUsername());
+		if (token == null) {
+			_logger.debug("No authentication token");
+			builder = Response.status(Status.UNAUTHORIZED).entity(Messages.UNAUTHENTICATED_REQUEST);
+		} else {
+			
+			UserDTO loggedInUser = em.find(UserDTO.class, token.getValue());
+			if (loggedInUser == null) {
+				builder = Response.status(Status.BAD_REQUEST).entity(Messages.BAD_AUTHENTICATON_TOKEN);
+			} else {
+				em.persist(creditCard);
+				_logger.debug("Credit Card : "+creditCard.getNumber()+" Registered under " + loggedInUser.getUsername());
+				builder = Response.ok();
+			}
+		}
+		
+		em.getTransaction().commit();
+		return builder.build();
+	}
+	
+	@POST
+	@Path("/authenticate")
+	@Produces(MediaType.APPLICATION_XML)
+	public Response authenticateUser(UserDTO user, @CookieParam(Config.TOKEN) Cookie token) {
+		Response.ResponseBuilder builder = null;
+		em.getTransaction().begin();
+		
+		_logger.debug("Authenticating " +user.getUsername()+"...");
 		
 		if (token == null) {
 			_logger.debug("No authentication token");
@@ -92,7 +120,7 @@ public class UserResource {
 		NewCookie newToken = null;
 		
 		if(token == null) {
-			newToken = new NewCookie(USER_TOKEN, username);
+			newToken = new NewCookie(Config.TOKEN, username);
 			_logger.debug("Generated Token: " + newToken.getValue());
 		} 
 		
