@@ -138,11 +138,17 @@ public class ConcertServiceTest {
 		try {
 			UserDTO userDTO = new UserDTO("Bulldog", "123", "Churchill", "Winston");
 			_service.createUser(userDTO);
+			
+			UserDTO userDTO1 = new UserDTO("Pitbull", "123", "Churchill", "Winston");
+			_service.createUser(userDTO1);
+			
+			UserDTO userDTO2 = new UserDTO("GermanShepard", "123", "Churchill", "Winston");
+			_service.createUser(userDTO2);
 		} catch(ServiceException e) {
 			fail();
 		}
 		Set<String> tableNames = new HashSet<String>();
-		// tableNames.add("USERS");
+		tableNames.add("USERS");
 		try {
 			DatabaseUtility.openDatabase();
 			DatabaseUtility.dumpDatabase(tableNames);

@@ -1,10 +1,14 @@
 package nz.ac.auckland.concert.common.dto;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -28,7 +32,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public class UserDTO {
 
 	@Id
-	@XmlElement(name="username")
+	@XmlAttribute(name="username")
 	private String _username;
 	
 	@XmlElement(name="password")
