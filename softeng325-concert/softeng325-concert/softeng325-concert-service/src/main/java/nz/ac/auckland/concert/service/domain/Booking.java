@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.persistence.CollectionTable;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -26,10 +27,13 @@ import nz.ac.auckland.concert.common.types.PriceBand;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Booking {
-	
+
 	@Id
 	@XmlAttribute(name="id")
 	private Long _concertId;
+	
+	@XmlElement(name="username")
+	private String _username;
 	
 	@XmlElement(name="concertTitle")
 	private String _concertTitle;
@@ -42,17 +46,20 @@ public class Booking {
 	@XmlElement(name="seats")
 	private Set<SeatDTO> _seats;
 	
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	@XmlElement(name="priceBand")
 	private PriceBand _priceBand;
 
-	public Booking() {}
+	public Booking() {
+	}
 
-	public Booking(Long concertId, String concertTitle,
+	public Booking(Long concertId, String username, String concertTitle,
 			LocalDateTime dateTime, Set<SeatDTO> seats, PriceBand priceBand) {
 		_concertId = concertId;
+		_username = username;
 		_concertTitle = concertTitle;
 		_dateTime = dateTime;
+
 		_seats = new HashSet<SeatDTO>();
 		_seats.addAll(seats);
 
@@ -77,5 +84,9 @@ public class Booking {
 
 	public PriceBand getPriceBand() {
 		return _priceBand;
+	}
+	
+	public String getUsername() {
+		return _username;
 	}
 }

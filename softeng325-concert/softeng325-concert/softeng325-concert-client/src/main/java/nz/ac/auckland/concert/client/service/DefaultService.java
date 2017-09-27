@@ -3,6 +3,7 @@ package nz.ac.auckland.concert.client.service;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,10 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 
+import nz.ac.auckland.concert.service.domain.Booking;
+import nz.ac.auckland.concert.service.domain.Reservation;
 import nz.ac.auckland.concert.service.util.Config;
+import nz.ac.auckland.concert.service.util.ReservationMapper;
 import nz.ac.auckland.concert.common.dto.BookingDTO;
 import nz.ac.auckland.concert.common.dto.ConcertDTO;
 import nz.ac.auckland.concert.common.dto.CreditCardDTO;
@@ -212,12 +216,42 @@ public class DefaultService implements ConcertService, ConcertService.NewsItemLi
 		mgr.download(AWS_BUCKET, imageName, f);
 		mgr.shutdownNow();
 	}
+	
 	@Override
 	public ReservationDTO reserveSeats(ReservationRequestDTO reservationRequest) throws ServiceException {
+		if (!reservationRequestValid(reservationRequest)) {
+			throw new ServiceException(Messages.RESERVATION_REQUEST_WITH_MISSING_FIELDS);
+		}
 		
-		Set<SeatDTO> seats = TheatreUtility.findAvailableSeats(reservationRequest.getNumberOfSeats(), reservationRequest.getSeatType(), new HashSet<SeatDTO>());
+		if (!reservationForValidConcertDate(reservationRequest)) {
+			throw new ServiceException(Messages.CONCERT_NOT_SCHEDULED_ON_RESERVATION_DATE);
+		}
+		
+		Builder builder = _client.target(RESERVATION_SERVICE_URI+"/"+reservationRequest.getConcertId()).request();
+		Response response = builder.get();
+		List<Booking> list = response.readEntity(new GenericType<List<Booking>>(){});
+		Set<Booking> set = new HashSet<>(list);
+		Set<SeatDTO> bookedSeats = new HashSet<>();
+		for (Booking b : set) {
+			bookedSeats.addAll(b.getSeats());
+		}
+		response.close();
+		Set<SeatDTO> seats = TheatreUtility.findAvailableSeats(reservationRequest.getNumberOfSeats(), reservationRequest.getSeatType(), bookedSeats);
+		
+		if (seats.isEmpty()) {
+			throw new ServiceException(Messages.INSUFFICIENT_SEATS_AVAILABLE_FOR_RESERVATION);
+		}
 		
 		ReservationDTO reservation = new ReservationDTO(_reservationIdCounter.incrementAndGet(), reservationRequest, seats);
+		Reservation domainReservation = ReservationMapper.toDomainModel(reservation, reservationRequest, null);
+		builder = _client.target(RESERVATION_SERVICE_URI).request();
+		try {
+			Response reserveResponse = builder.put(Entity.entity(domainReservation,MediaType.APPLICATION_XML));
+			reserveResponse.close();
+		} catch (ProcessingException e) {
+			throw new ServiceException(Messages.SERVICE_COMMUNICATION_ERROR);
+		}
+		
 		
 		return reservation;
 	}
@@ -250,8 +284,18 @@ public class DefaultService implements ConcertService, ConcertService.NewsItemLi
 
 	@Override
 	public Set<BookingDTO> getBookings() throws ServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		Builder builder = _client.target(RESERVATION_SERVICE_URI).request();
+		Response response = null;
+		try {
+			response = builder.get();
+		} catch (ProcessingException e) {
+			throw new ServiceException(Messages.SERVICE_COMMUNICATION_ERROR);
+		}
+		
+		List<BookingDTO> list = response.readEntity(new GenericType<List<BookingDTO>>(){});
+		Set<BookingDTO> set = new HashSet<>(list);
+		response.close();
+		return set;
 	}
 
 	@Override
@@ -296,6 +340,46 @@ public class DefaultService implements ConcertService, ConcertService.NewsItemLi
 			String cookieValue = cookies.get(Config.TOKEN).getValue();
 			_cookieValues.add(cookieValue);
 		}
+	}
+	
+	/**
+	 * 
+	 * @param request
+	 * @return
+	 */
+	private boolean reservationRequestValid(ReservationRequestDTO request) {
+		if (request.getNumberOfSeats() == 0 || request.getSeatType() == null ||
+				request.getConcertId() == null || request.getDate() == null) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 
+	 * @param request
+	 * @return
+	 */
+	private boolean reservationForValidConcertDate(ReservationRequestDTO request) throws ServiceException {
+		Long concertId = request.getConcertId();
+		Builder builder = _client.target(CONCERT_SERVICE_URI+"/"+concertId).request();
+		Response response = null;
+		 
+		try {
+			response = builder.get();
+		} catch (ProcessingException e) {
+			throw new ServiceException(Messages.SERVICE_COMMUNICATION_ERROR);
+		}
+		ConcertDTO concert = response.readEntity(ConcertDTO.class);
+		
+		for (LocalDateTime concertDate : concert.getDates()) {
+			if (concertDate.equals(request.getDate())) {
+				return true;
+			}
+		}
+		response.close();
+		
+		return false;
 	}
 	
 }

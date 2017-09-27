@@ -11,8 +11,9 @@ import nz.ac.auckland.concert.service.domain.Reservation;
 */
 public class ReservationMapper {
 
-	static Reservation toDomainModel(ReservationDTO reservation, ReservationRequestDTO request) {
+	public static Reservation toDomainModel(ReservationDTO reservation, ReservationRequestDTO request, String username) {
 		Reservation domainReservation = new Reservation(reservation.getId(),
+				username,
 				reservation.getSeats(),
 				request.getNumberOfSeats(),
 				request.getSeatType(),
@@ -21,7 +22,7 @@ public class ReservationMapper {
 		return domainReservation;
 	}
 	
-	static ReservationDTO toDto(Reservation reservation) {
+	public static ReservationDTO toDto(Reservation reservation) {
 		ReservationRequestDTO request = new ReservationRequestDTO(reservation.getNumberOfSeats(),
 				reservation.getSeatType(),
 				reservation.getConcertId(),

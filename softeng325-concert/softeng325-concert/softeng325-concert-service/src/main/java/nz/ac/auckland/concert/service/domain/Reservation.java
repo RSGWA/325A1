@@ -31,6 +31,9 @@ public class Reservation {
 	@XmlAttribute(name="id")
 	private Long _id;
 	
+	@XmlAttribute(name="username")
+	private String _username;
+	
 	@ElementCollection
 	@CollectionTable(name="RESERVED_SEATS", joinColumns=@JoinColumn(name="RESERVATION_ID"))
 	@XmlElement(name="seats")
@@ -51,9 +54,10 @@ public class Reservation {
 	
 	public Reservation() {}
 	
-	public Reservation(Long id, Set<SeatDTO> seats, int numberOfSeats, 
+	public Reservation(Long id, String username, Set<SeatDTO> seats, int numberOfSeats, 
 			PriceBand seatType, Long concertId, LocalDateTime date) {
 		_id = id;
+		_username = username;
 		_seats = new HashSet<SeatDTO>(seats);
 		_numberOfSeats = numberOfSeats;
 		_seatType = seatType;
@@ -83,5 +87,13 @@ public class Reservation {
 	
 	public LocalDateTime getDate() {
 		return _date;
+	}
+	
+	public String getUsername() {
+		return _username;
+	}
+	
+	public String setUsername(String username) {
+		return _username = username;
 	}
 }

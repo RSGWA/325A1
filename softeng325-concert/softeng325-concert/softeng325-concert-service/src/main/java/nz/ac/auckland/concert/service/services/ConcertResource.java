@@ -13,6 +13,7 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,23 @@ public class ConcertResource {
 			.getLogger(ConcertResource.class);
 	
 	EntityManager em = PersistenceManager.instance().createEntityManager();
+	
+	@GET
+	@Path("/{id}")
+	@Produces(MediaType.APPLICATION_XML)
+	public Response retrieveConcert(@PathParam("id") Long id) {
+		em.getTransaction().begin();
+		ConcertDTO concert = em.find(ConcertDTO.class, id);
+		
+		Response.ResponseBuilder builder = null;
+		if (concert == null) {
+			builder = Response.status(Status.NOT_FOUND);
+		} else {
+			builder = Response.ok().entity(concert);
+		}
+		
+		return builder.build();
+	}
 	
 	@GET
 	@Produces(MediaType.APPLICATION_XML)

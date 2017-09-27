@@ -102,12 +102,16 @@ public class UserResource {
 				builder = Response.status(Status.BAD_REQUEST).entity(Messages.AUTHENTICATE_USER_WITH_MISSING_FIELDS);
 			} else {
 				UserDTO fullUser = em.find(UserDTO.class, user.getUsername());
-				if (!fullUser.getPassword().equals(user.getPassword())) {
-					_logger.debug("Incorrect Password");
-					builder = Response.status(Status.BAD_REQUEST).entity(Messages.AUTHENTICATE_USER_WITH_ILLEGAL_PASSWORD);
+				if (fullUser == null) {
+					builder = Response.status(Status.BAD_REQUEST).entity(Messages.AUTHENTICATE_NON_EXISTENT_USER);
 				} else {
-					_logger.debug("Authenticated user");
-					builder = Response.ok(fullUser);
+					if (!fullUser.getPassword().equals(user.getPassword())) {
+						_logger.debug("Incorrect Password");
+						builder = Response.status(Status.BAD_REQUEST).entity(Messages.AUTHENTICATE_USER_WITH_ILLEGAL_PASSWORD);
+					} else {
+						_logger.debug("Authenticated user");
+						builder = Response.ok(fullUser);
+					}
 				}
 			}
 		}
